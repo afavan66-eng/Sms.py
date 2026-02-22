@@ -20,15 +20,13 @@
         .mobile-header { display: none; background: var(--side); padding: 15px; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 998; align-items: center; justify-content: space-between; }
         .hamburger { font-size: 24px; color: var(--accent); cursor: pointer; }
         .main { margin-left: 0; padding: 25px; transition: 0.3s; display: none; }
-        .container { background: var(--side); padding: 30px; border-radius: 12px; border: 1px solid #222; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .container { background: var(--side); padding: 30px; border-radius: 12px; border: 1px solid #222; margin-top: 20px; }
         @media (min-width: 992px) { .sidebar { left: 0; } .main { margin-left: 280px; display: block; } .mobile-header { display: none; } }
         @media (max-width: 991px) { .mobile-header { display: flex; } }
-        input { width: 100%; padding: 14px; background: var(--input-bg); border: 1px solid #333; color: var(--accent); border-radius: 8px; margin: 10px 0; outline: none; box-sizing: border-box; font-family: monospace; }
-        input:focus { border-color: var(--accent); }
+        input { width: 100%; padding: 14px; background: var(--input-bg); border: 1px solid #333; color: var(--accent); border-radius: 8px; margin: 10px 0; outline: none; box-sizing: border-box; }
         button { width: 100%; padding: 15px; background: var(--accent); border: none; color: #000; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        button:hover { background: #00cc00; transform: scale(1.01); }
-        .result { margin-top: 30px; background: #050505; border-radius: 10px; padding: 20px; border: 1px dashed var(--accent); display: none; position: relative; }
-        pre { white-space: pre-wrap; word-wrap: break-word; font-size: 14px; color: var(--accent); margin: 0; font-family: 'Consolas', monospace; }
+        .result { margin-top: 30px; background: #050505; border-radius: 10px; padding: 20px; border: 1px dashed var(--accent); display: none; }
+        pre { white-space: pre-wrap; word-wrap: break-word; font-size: 14px; color: var(--accent); margin: 0; font-family: monospace; }
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 990; }
         #overlay.active { display: block; }
     </style>
@@ -38,8 +36,7 @@
     <div id="key-screen">
         <div class="key-card">
             <i class="fa-solid fa-bolt" style="font-size: 45px; color: var(--accent); margin-bottom: 20px;"></i>
-            <h2 style="margin: 0;">WROX VIP GİRİŞ</h2>
-            <p style="color: #555; font-size: 13px; margin-bottom: 20px;">Sisteme erişmek için anahtarınızı girin.</p>
+            <h2>WROX VIP GİRİŞ</h2>
             <input type="password" id="main-key" placeholder="Parolayı giriniz">
             <button onclick="checkKey()">SİSTEME GİRİŞ YAP</button>
         </div>
@@ -48,7 +45,7 @@
     <div class="mobile-header" id="mob-head" style="display:none;">
         <i class="fa-solid fa-bars hamburger" onclick="toggleMenu()"></i>
         <span style="color: var(--accent); font-weight: bold;">WROX PANEL</span>
-        <div style="width: 24px;"></div>
+        <div></div>
     </div>
 
     <div id="overlay" onclick="toggleMenu()"></div>
@@ -60,16 +57,8 @@
             <div class="nav-item" onclick="tab('adsoyadpro')"><i class="fa-solid fa-users"></i> Ad Soyad Pro</div>
             <div class="nav-item" onclick="tab('adililce')"><i class="fa-solid fa-map-location"></i> Ad İl/İlçe</div>
             <div class="nav-item" onclick="tab('ailepro')"><i class="fa-solid fa-people-group"></i> Aile Sorgu</div>
-            <div class="nav-item" onclick="tab('sulale')"><i class="fa-solid fa-sitemap"></i> Sülale Sorgu</div>
-            <div class="nav-item" onclick="tab('soyagaci')"><i class="fa-solid fa-tree"></i> Soyağacı</div>
-            <div class="nav-item" onclick="tab('adrespro')"><i class="fa-solid fa-home"></i> Adres Sorgu</div>
-            <div class="nav-item" onclick="tab('isyeri')"><i class="fa-solid fa-building"></i> İşyeri Sorgu</div>
             <div class="nav-item" onclick="tab('tcgsm')"><i class="fa-solid fa-mobile"></i> TC -> GSM</div>
             <div class="nav-item" onclick="tab('gsmtc')"><i class="fa-solid fa-phone"></i> GSM -> TC</div>
-            <div class="nav-item" onclick="tab('gncloperator')"><i class="fa-solid fa-tower-cell"></i> Operatör</div>
-            <div class="nav-item" onclick="tab('iban')"><i class="fa-solid fa-credit-card"></i> IBAN</div>
-            <div class="nav-item" onclick="tab('okulno')"><i class="fa-solid fa-school"></i> Okul No</div>
-            <div class="nav-item" onclick="tab('tg')"><i class="fa-brands fa-telegram"></i> TG Username</div>
             <div class="nav-item" onclick="tab('sms')"><i class="fa-solid fa-comment-dots"></i> SMS Bomber</div>
         </div>
     </div>
@@ -96,9 +85,7 @@
                 document.getElementById('key-screen').style.display = 'none';
                 document.getElementById('content-ui').style.display = 'block';
                 if(window.innerWidth < 992) document.getElementById('mob-head').style.display = 'flex';
-            } else {
-                alert("Hatalı Parola!");
-            }
+            } else { alert("Hatalı Parola!"); }
         }
 
         function toggleMenu() {
@@ -114,61 +101,56 @@
             if(window.innerWidth < 992) toggleMenu();
             
             const inp = document.getElementById('inputs');
-            inp.innerHTML = ''; // Önce temizle
-
             if(m === 'adsoyadpro') {
                 inp.innerHTML = `<input id="ad" placeholder="Ad"><input id="soyad" placeholder="Soyad"><input id="il" placeholder="İl">`;
             } else if(m === 'adililce') {
                 inp.innerHTML = `<input id="ad" placeholder="Ad"><input id="il" placeholder="İl">`;
-            } else if(m === 'sms') {
-                inp.innerHTML = `<input id="v1" placeholder="Telefon No (5xx...)">`;
-            } else if(m === 'gsmtc' || m === 'gncloperator' || m === 'tcgsm') {
-                inp.innerHTML = `<input id="v1" placeholder="Numara veya TC">`;
-            } else if(m === 'iban') {
-                inp.innerHTML = `<input id="v1" placeholder="IBAN (TR...)">`;
-            } else if(m === 'tg') {
-                inp.innerHTML = `<input id="v1" placeholder="Telegram Kullanıcı Adı">`;
+            } else if(m === 'sms' || m === 'gsmtc') {
+                inp.innerHTML = `<input id="v1" placeholder="Telefon No (5xxxxxxxxx)">`;
             } else {
                 inp.innerHTML = `<input id="v1" placeholder="TC Kimlik No Girin...">`;
             }
         }
 
         async function sorgula() {
-            let url = `${base}/${mode}.php?`;
-            const out = document.getElementById('output');
-            document.getElementById('res-box').style.display = 'block';
-            out.innerText = "🔄 İşlem yapılıyor...";
-
-            // Parametre Toplama
+            let finalUrl = `${base}/${mode}.php?`;
+            
+            // Parametre Eşleme
             if(mode === 'adsoyadpro') {
-                url += `ad=${document.getElementById('ad').value}&soyad=${document.getElementById('soyad').value}&il=${document.getElementById('il').value}`;
+                finalUrl += `ad=${document.getElementById('ad').value}&soyad=${document.getElementById('soyad').value}&il=${document.getElementById('il').value}`;
             } else if(mode === 'adililce') {
-                url += `ad=${document.getElementById('ad').value}&il=${document.getElementById('il').value}`;
+                finalUrl += `ad=${document.getElementById('ad').value}&il=${document.getElementById('il').value}`;
             } else if(mode === 'sms' || mode === 'gsmtc') {
-                url += `gsm=${document.getElementById('v1').value}`;
-            } else if(mode === 'gncloperator') {
-                url += `numara=${document.getElementById('v1').value}`;
-            } else if(mode === 'tg') {
-                url += `username=${document.getElementById('v1').value}`;
-            } else if(mode === 'iban') {
-                url += `iban=${document.getElementById('v1').value}`;
+                finalUrl += `gsm=${document.getElementById('v1').value}`;
             } else {
-                url += `tc=${document.getElementById('v1').value}`;
+                finalUrl += `tc=${document.getElementById('v1').value}`;
             }
 
+            const output = document.getElementById('output');
+            document.getElementById('res-box').style.display = 'block';
+            output.innerText = "🔄 İstek gönderiliyor, lütfen bekleyin...";
+
             try {
-                const proxy = "https://api.allorigins.win/get?url=";
-                const response = await fetch(proxy + encodeURIComponent(url));
+                // AllOrigins Proxy (Cache kırmak için rastgele sayı ekledik)
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(finalUrl)}&_=${Date.now()}`;
+                
+                const response = await fetch(proxyUrl);
+                if(!response.ok) throw new Error("Proxy sunucusu yanıt vermiyor.");
+                
                 const data = await response.json();
                 
                 if(data.contents) {
-                    // Veriyi temizleyip ekrana basıyoruz
-                    out.innerText = data.contents;
+                    // Alwaysdata bazen 'Blocked' dönerse bunu yakala
+                    if(data.contents.includes("Access Denied") || data.contents.includes("blocked")) {
+                        output.innerText = "❌ HATA: IP Adresiniz veya Proxy API tarafından engellendi.";
+                    } else {
+                        output.innerText = data.contents;
+                    }
                 } else {
-                    out.innerText = "Sistemden yanıt alınamadı.";
+                    output.innerText = "⚠️ API'den boş yanıt geldi. Servis bakımda olabilir.";
                 }
             } catch(e) {
-                out.innerText = "Bağlantı Hatası: API sunucusu kapalı olabilir veya proxy engellendi.";
+                output.innerText = "❌ BAĞLANTI HATASI: " + e.message + "\n\nİpucu: VPN kullanıyorsanız kapatıp deneyin veya tarayıcı önbelleğini temizleyin.";
             }
         }
     </script>
