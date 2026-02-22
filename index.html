@@ -1,143 +1,177 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HILE_WROX - Sorgu Paneli</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar { background-color: #1e293b; border-bottom: 1px solid #334155; }
-        .sidebar { background-color: #1e293b; height: 100vh; position: fixed; left: -250px; top: 0; width: 250px; transition: 0.3s; z-index: 1000; padding-top: 60px; border-right: 1px solid #334155; }
-        .sidebar.active { left: 0; }
-        .sidebar a { padding: 15px; text-decoration: none; font-size: 1.1rem; color: #cbd5e1; display: block; transition: 0.2s; }
-        .sidebar a:hover { background-color: #334155; color: white; }
-        .main-content { transition: 0.3s; padding: 20px; }
-        .card { background-color: #1e293b; border: 1px solid #334155; color: white; margin-bottom: 20px; }
-        .btn-primary { background-color: #3b82f6; border: none; }
-        .result-box { background-color: #0f172a; border-radius: 8px; padding: 15px; border-left: 4px solid #3b82f6; margin-top: 10px; }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
-    </style>
-</head>
-<body>
+import sqlite3
+import requests
+import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ParseMode
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 
-<nav class="navbar navbar-dark sticky-top">
-    <div class="container-fluid">
-        <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand ms-3" href="#"><b>@HILE_WROX</b> PANEL</a>
-        <div class="d-flex align-items-center">
-            <span class="badge bg-primary">VIP AKTİF</span>
-        </div>
-    </div>
-</nav>
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-<div class="sidebar" id="sidebar">
-    <a href="#" onclick="showSection('home')"><i class="fa fa-home me-2"></i> Ana Sayfa</a>
-    <a href="#" onclick="showSection('soyagaci')"><i class="fa fa-dna me-2"></i> Soyağacı</a>
-    <a href="#" onclick="showSection('adsoyadpro')"><i class="fa fa-user me-2"></i> Ad Soyad İl PRO</a>
-    <a href="#" onclick="showSection('tcpro')"><i class="fa fa-id-card me-2"></i> TC PRO</a>
-    <a href="#" onclick="showSection('sulale')"><i class="fa fa-tree me-2"></i> Sülale</a>
-    <hr>
-    <a href="#" style="color: #ef4444;"><i class="fa fa-sign-out-alt me-2"></i> Çıkış</a>
-</div>
+# --- AYARLAR ---
+TOKEN = "8515085006:AAHXt2yp7cg7DxljLMoAX4FOpw4b_QiwCOk"
+ADMIN_ID = 7234980007 
 
-<div id="overlay" onclick="toggleSidebar()"></div>
+# API Listesi
+BASE_URL = "https://punisher.alwaysdata.net/apiservices"
+SULALE_URL = "https://arastir.sbs/api/sulale.php"
+ADRES_URL = "https://arastir.sbs/api/adres.php"
+GSMTC_URL = "https://arastir.sbs/api/gsmtc.php"
 
-<div class="main-content container mt-4">
+AD, SOYAD, IL, TEK_VERI = range(4)
+
+# --- VERİTABANI ---
+def init_db():
+    conn = sqlite3.connect('hile_wrox.db')
+    conn.execute('CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, status TEXT)')
+    conn.commit(); conn.close()
+
+def get_status(user_id):
+    if user_id == ADMIN_ID: return "Admin"
+    conn = sqlite3.connect('hile_wrox.db')
+    res = conn.execute("SELECT status FROM users WHERE user_id = ?", (user_id,)).fetchone()
+    conn.close()
+    return res[0] if res else "Freemium"
+
+# --- TÜM VERİLERİ YAKALAYAN DALGIÇ FONKSİYON ---
+def build_paged_output(data, page=0, per_page=5, op=""):
+    results = []
+    if isinstance(data, list):
+        results = data
+    elif isinstance(data, dict):
+        # API'den gelebilecek tüm anahtar isimlerini kontrol eder
+        results = data.get("soyagaci") or data.get("data") or data.get("results") or \
+                  data.get("result") or data.get("Akrabalar") or data.get("Sulale")
+        if not results and any(k in str(data).lower() for k in ["tc", "ad", "soyad"]):
+            results = [data]
+
+    if not results or not isinstance(results, list):
+        return None, 0
+
+    total_items = len(results)
+    total_pages = (total_items + per_page - 1) // per_page
+    current_items = results[page * per_page : (page + 1) * per_page]
     
-    <div id="section-soyagaci" class="sorgu-section" style="display: none;">
-        <div class="card shadow">
-            <div class="card-body">
-                <h4 class="card-title text-primary"><i class="fa fa-dna"></i> Soyağacı Sorgu</h4>
-                <p class="text-muted small">Kişinin tüm alt-üst soy bilgilerini listeler.</p>
-                <input type="text" id="tc_input" class="form-control mb-3" placeholder="TC Kimlik No Girin">
-                <button class="btn btn-primary w-100" onclick="performQuery('soyagaci')">Sorgula</button>
-            </div>
-        </div>
-    </div>
+    output = f"<b>SORGU SONUCU ({total_items} Kayıt)</b>\n\n"
+    
+    for item in current_items:
+        f = {str(k).lower(): v for k, v in item.items()}
+        def get_v(keys):
+            for k in keys:
+                if k in f and f[k] is not None and str(f[k]).strip() != "": return str(f[k]).strip()
+            return "Bilinmiyor"
 
-    <div id="section-adsoyadpro" class="sorgu-section" style="display: none;">
-        <div class="card shadow">
-            <div class="card-body">
-                <h4 class="card-title text-success"><i class="fa fa-user"></i> Ad Soyad İl PRO</h4>
-                <div class="row g-2">
-                    <div class="col-md-4"><input type="text" id="ad_pro" class="form-control" placeholder="Ad"></div>
-                    <div class="col-md-4"><input type="text" id="soyad_pro" class="form-control" placeholder="Soyad"></div>
-                    <div class="col-md-4"><input type="text" id="il_pro" class="form-control" placeholder="İl"></div>
-                </div>
-                <button class="btn btn-success w-100 mt-3" onclick="performQuery('adsoyadpro')">Detaylı Sorgula</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="results" class="mt-4"></div>
-</div>
-
-<script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        const overlay = document.getElementById('overlay');
-        overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function showSection(section) {
-        document.querySelectorAll('.sorgu-section').forEach(s => s.style.display = 'none');
-        const target = document.getElementById('section-' + section);
-        if(target) target.style.display = 'block';
-        toggleSidebar();
-    }
-
-    async function performQuery(type) {
-        const resultDiv = document.getElementById('results');
-        resultDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary"></div><p>Sorgulanıyor...</p></div>';
+        # Başlık belirleme (Yakinlik, İşyeri adı veya Sorgu tipi)
+        title = get_v(["iliski", "yakinlik", "yakinligi", "isyeri_adi", "kurum_adi", "tip"]).upper()
+        ad_soyad = f"{get_v(['ad', 'adi', 'name'])} {get_v(['soyad', 'soyadi', 'surname'])}".replace("Bilinmiyor Bilinmiyor", "Bilinmiyor").strip()
+        tc = get_v(["tc", "tcno", "tc_no", "kimlik"])
         
-        let url = "";
-        let params = new URLSearchParams();
-
-        if(type === 'soyagaci') {
-            url = "https://punisher.alwaysdata.net/apiservices/soyagaci.php";
-            params.append('tc', document.getElementById('tc_input').value);
-        } else if(type === 'adsoyadpro') {
-            url = "https://punisher.alwaysdata.net/apiservices/adsoyadpro.php";
-            params.append('ad', document.getElementById('ad_pro').value);
-            params.append('soyad', document.getElementById('soyad_pro').value);
-            params.append('il', document.getElementById('il_pro').value);
-        }
-
-        try {
-            const response = await fetch(url + "?" + params.toString());
-            const data = await response.json();
+        output += f"<b>📌 {title}</b>\n👤 {ad_soyad}\n🆔 TC: {tc}\n"
+        
+        # Ek Bilgiler (Adres, GSM, Okul, IBAN vb.)
+        ek = get_v(["il", "adres", "gsm", "telefon", "okul_no", "iban", "sube"])
+        if ek != "Bilinmiyor": output += f"📝 Bilgi: {ek}\n"
+        
+        # Yaş Hesaplama
+        dogum = get_v(["dogum", "dogumtarihi", "dtarih"])
+        if dogum != "Bilinmiyor":
+            try:
+                yil = int(dogum.split('.')[-1]) if '.' in dogum else int(dogum[:4])
+                output += f"🎂 Doğum: {dogum} ({2026 - yil} yaş)\n"
+            except: pass
             
-            // Botun içindeki derin tarama mantığı
-            let results = data.soyagaci || data.data || data.results || (Array.isArray(data) ? data : [data]);
-            
-            if(results && results.length > 0) {
-                let html = `<h5>Bulunan Kayıtlar (${results.length})</h5>`;
-                results.forEach(item => {
-                    html += `
-                    <div class="result-box">
-                        <b>${(item.Yakinlik || item.iliski || "Kişi").toUpperCase()}</b><br>
-                        ${item.Ad || item.Adi} ${item.Soyad || item.Soyadi}<br>
-                        TC: ${item.TC || item.tc_no || "Bilinmiyor"}<br>
-                        Durum: ${item.OlumTarihi ? 'VEFAT ('+item.OlumTarihi+')' : 'HAYATTA'}
-                    </div>`;
-                });
-                resultDiv.innerHTML = html;
-            } else {
-                resultDiv.innerHTML = '<div class="alert alert-warning">Kayıt bulunamadı.</div>';
-            }
-        } catch (error) {
-            resultDiv.innerHTML = '<div class="alert alert-danger">Sunucu hatası veya API erişimi engellendi.</div>';
+        output += "───────────────\n"
+
+    return output[:4000], total_pages
+
+# --- BOT MANTIĞI VE BUTONLAR ---
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    init_db()
+    uid = update.effective_user.id
+    kb = [[InlineKeyboardButton("🆓 Ücretsiz", callback_data='f')], [InlineKeyboardButton("💎 VIP", callback_data='v')]]
+    text = f"💠 <b>@HILE_WROX PANEL</b>\n👑 Statü: <b>{get_status(uid)}</b>"
+    if update.message: await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode=ParseMode.HTML)
+    else: await update.callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb), parse_mode=ParseMode.HTML)
+    return ConversationHandler.END
+
+async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.callback_query; await q.answer()
+    
+    if q.data == 'ana_menu': return await start(update, context)
+    
+    if q.data == 'v':
+        if get_status(q.from_user.id) not in ["VIP", "Admin"]:
+            await q.edit_message_text("🚫 VIP Gerekli.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Geri", callback_data='ana_menu')]])); return
+        
+        # Tüm sorguları buraya ekledik
+        kb = [
+            [InlineKeyboardButton("🧬 Soyağacı", callback_data='api_soyagaci'), InlineKeyboardButton("📍 Adres PRO", callback_data='api_adrespro')],
+            [InlineKeyboardButton("👤 Ad Soyad İl", callback_data='api_adsoyadpro')],
+            [InlineKeyboardButton("🏢 İşyeri", callback_data='api_isyeri'), InlineKeyboardButton("👥 İş. Ark.", callback_data='api_isyeriark')],
+            [InlineKeyboardButton("💳 IBAN Çözücü", callback_data='api_iban'), InlineKeyboardButton("🎓 Okul No", callback_data='api_okulno')],
+            [InlineKeyboardButton("🆔 TC PRO", callback_data='api_tcpro'), InlineKeyboardButton("🌳 Sülale", callback_data='api_sulale')],
+            [InlineKeyboardButton("🏠 Adres", callback_data='api_adres'), InlineKeyboardButton("📞 GSM TC", callback_data='api_gsmtc')],
+            [InlineKeyboardButton("🔙 Geri", callback_data='ana_menu')]
+        ]
+        await q.edit_message_text("💎 <b>VIP TÜM SORGULAR:</b>", reply_markup=InlineKeyboardMarkup(kb), parse_mode=ParseMode.HTML); return
+
+    context.user_data['op'] = q.data
+    if "adsoyad" in q.data:
+        await q.message.reply_text("👤 <b>AD girin:</b>", parse_mode=ParseMode.HTML); return AD
+    else:
+        prompt = "TC No" if "iban" not in q.data else "IBAN"
+        await q.message.reply_text(f"🔍 Sorgulanacak <b>{prompt}</b> girin:", parse_mode=ParseMode.HTML); return TEK_VERI
+
+async def execute_api(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    op = context.user_data.get('op', '').replace('api_', '')
+    val = update.message.text
+    wait = await update.message.reply_text("⏳ Veriler sorgulanıyor...")
+    
+    try:
+        # API URL Seçimi
+        urls = {"sulale": SULALE_URL, "adres": ADRES_URL, "gsmtc": GSMTC_URL}
+        url = urls.get(op, f"{BASE_URL}/{op}.php")
+        
+        params = {
+            'ad': context.user_data.get('ad'), 'soyad': context.user_data.get('soyad'),
+            'il': context.user_data.get('il'), 'tc': val, 'tcno': val, 'gsm': val, 'iban': val
         }
-    }
+        
+        r = requests.get(url, params=params, timeout=30).json()
+        txt, tot = build_paged_output(r, 0, op=op)
+        
+        await wait.delete()
+        if txt:
+            kb = [] # Sayfalama eklenebilir
+            kb.append([InlineKeyboardButton("🔙 Ana Menü", callback_data="ana_menu")])
+            await update.message.reply_text(txt, reply_markup=InlineKeyboardMarkup(kb), parse_mode=ParseMode.HTML)
+        else:
+            await update.message.reply_text("❌ Kayıt bulunamadı.")
+    except:
+        await wait.edit_text("❌ Sunucu hatası veya API yanıt vermiyor.")
+    
+    return ConversationHandler.END
 
-    // İlk açılış
-    showSection('soyagaci');
-</script>
+# Ad-Soyad-İl için ara aşamalar
+async def get_ad(u, c): c.user_data['ad'] = u.message.text; await u.message.reply_text("👤 <b>SOYAD:</b>"); return SOYAD
+async def get_soyad(u, c): 
+    c.user_data['soyad'] = u.message.text
+    if c.user_data.get('op') == 'api_adsoyadpro':
+        await u.message.reply_text("📍 <b>İL (Tüm TR için '.'):</b>"); return IL
+    return await execute_api(u, c)
+async def get_il(u, c): c.user_data['il'] = u.message.text; return await execute_api(u, c)
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+if __name__ == '__main__':
+    init_db()
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(ConversationHandler(
+        entry_points=[CallbackQueryHandler(handle_buttons)],
+        states={
+            AD: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_ad)],
+            SOYAD: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_soyad)],
+            IL: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_il)],
+            TEK_VERI: [MessageHandler(filters.TEXT & ~filters.COMMAND, execute_api)]
+        },
+        fallbacks=[CommandHandler("start", start)]
+    ))
+    app.run_polling()
