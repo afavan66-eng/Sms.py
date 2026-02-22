@@ -8,42 +8,27 @@
     <style>
         :root { --bg: #0d0d0d; --side: #151515; --accent: #00ff00; --text: #e0e0e0; --input-bg: #050505; }
         body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        
-        /* Giriş Ekranı */
         #key-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; }
         .key-card { background: var(--side); padding: 40px; border-radius: 15px; border: 1px solid #333; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(0,255,0,0.1); }
-        
-        /* Sidebar ve Menü */
         .sidebar { width: 280px; background: var(--side); height: 100vh; border-right: 1px solid #222; position: fixed; left: -280px; transition: 0.3s; z-index: 999; display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
         .logo-area { padding: 30px 20px; font-size: 22px; font-weight: bold; color: var(--accent); border-bottom: 1px solid #222; text-align: center; text-transform: uppercase; letter-spacing: 3px; }
-        
         .nav-links { flex: 1; padding-top: 10px; overflow-y: auto; }
         .nav-item { padding: 14px 25px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; color: #999; border-left: 4px solid transparent; font-size: 14px; }
         .nav-item i { width: 30px; font-size: 17px; }
         .nav-item:hover, .nav-item.active { background: #1a1a1a; color: #fff; border-left-color: var(--accent); }
-
-        /* Mobil Header */
         .mobile-header { display: none; background: var(--side); padding: 15px; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 998; align-items: center; justify-content: space-between; }
         .hamburger { font-size: 24px; color: var(--accent); cursor: pointer; }
-
-        /* Ana İçerik Alanı */
         .main { margin-left: 0; padding: 25px; transition: 0.3s; display: none; }
         .container { background: var(--side); padding: 30px; border-radius: 12px; border: 1px solid #222; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
         @media (min-width: 992px) { .sidebar { left: 0; } .main { margin-left: 280px; display: block; } .mobile-header { display: none; } }
         @media (max-width: 991px) { .mobile-header { display: flex; } }
-
-        /* Form Elemanları */
         input { width: 100%; padding: 14px; background: var(--input-bg); border: 1px solid #333; color: var(--accent); border-radius: 8px; margin: 10px 0; outline: none; box-sizing: border-box; font-family: monospace; }
         input:focus { border-color: var(--accent); }
         button { width: 100%; padding: 15px; background: var(--accent); border: none; color: #000; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         button:hover { background: #00cc00; transform: scale(1.01); }
-
-        /* Sonuç Kutusu */
         .result { margin-top: 30px; background: #050505; border-radius: 10px; padding: 20px; border: 1px dashed var(--accent); display: none; position: relative; }
         pre { white-space: pre-wrap; word-wrap: break-word; font-size: 14px; color: var(--accent); margin: 0; font-family: 'Consolas', monospace; }
-        
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 990; }
         #overlay.active { display: block; }
     </style>
@@ -106,7 +91,6 @@
         let mode = 'tcpro';
         const base = "https://punisher.alwaysdata.net/apiservices";
 
-        // Giriş Kontrolü
         function checkKey() {
             if(document.getElementById('main-key').value === "Efecan1903") {
                 document.getElementById('key-screen').style.display = 'none';
@@ -117,13 +101,11 @@
             }
         }
 
-        // Hamburger Menü Aç/Kapat
         function toggleMenu() {
             document.getElementById('sidebar-ui').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
         }
 
-        // Tab Değiştirme ve Input Düzenleme
         function tab(m) {
             mode = m;
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -132,13 +114,16 @@
             if(window.innerWidth < 992) toggleMenu();
             
             const inp = document.getElementById('inputs');
+            inp.innerHTML = ''; // Önce temizle
+
             if(m === 'adsoyadpro') {
                 inp.innerHTML = `<input id="ad" placeholder="Ad"><input id="soyad" placeholder="Soyad"><input id="il" placeholder="İl">`;
             } else if(m === 'adililce') {
                 inp.innerHTML = `<input id="ad" placeholder="Ad"><input id="il" placeholder="İl">`;
-            } else if(m === 'sms' || m === 'gsmtc' || m === 'gncloperator') {
-                let p = (m==='sms') ? "Telefon No (Sms Gönderilecek)" : "Telefon No (5xx...)";
-                inp.innerHTML = `<input id="v1" placeholder="${p}">`;
+            } else if(m === 'sms') {
+                inp.innerHTML = `<input id="v1" placeholder="Telefon No (5xx...)">`;
+            } else if(m === 'gsmtc' || m === 'gncloperator' || m === 'tcgsm') {
+                inp.innerHTML = `<input id="v1" placeholder="Numara veya TC">`;
             } else if(m === 'iban') {
                 inp.innerHTML = `<input id="v1" placeholder="IBAN (TR...)">`;
             } else if(m === 'tg') {
@@ -148,18 +133,19 @@
             }
         }
 
-        // Sorgulama Fonksiyonu
         async function sorgula() {
             let url = `${base}/${mode}.php?`;
-            
-            // Parametre Hazırlama
+            const out = document.getElementById('output');
+            document.getElementById('res-box').style.display = 'block';
+            out.innerText = "🔄 İşlem yapılıyor...";
+
+            // Parametre Toplama
             if(mode === 'adsoyadpro') {
                 url += `ad=${document.getElementById('ad').value}&soyad=${document.getElementById('soyad').value}&il=${document.getElementById('il').value}`;
             } else if(mode === 'adililce') {
                 url += `ad=${document.getElementById('ad').value}&il=${document.getElementById('il').value}`;
             } else if(mode === 'sms' || mode === 'gsmtc') {
-                let key = (mode === 'sms') ? 'gsm' : 'gsm'; 
-                url += `${key}=${document.getElementById('v1').value}`;
+                url += `gsm=${document.getElementById('v1').value}`;
             } else if(mode === 'gncloperator') {
                 url += `numara=${document.getElementById('v1').value}`;
             } else if(mode === 'tg') {
@@ -170,26 +156,21 @@
                 url += `tc=${document.getElementById('v1').value}`;
             }
 
-            const output = document.getElementById('output');
-            document.getElementById('res-box').style.display = 'block';
-            output.innerText = "🔄 Sorgulanıyor, lütfen bekleyin...";
-
             try {
-                // CORS Proxy Kullanımı (Alwaysdata engeli için)
                 const proxy = "https://api.allorigins.win/get?url=";
                 const response = await fetch(proxy + encodeURIComponent(url));
                 const data = await response.json();
                 
                 if(data.contents) {
-                    output.innerText = data.contents;
+                    // Veriyi temizleyip ekrana basıyoruz
+                    out.innerText = data.contents;
                 } else {
-                    output.innerText = "Sistemden boş yanıt döndü.";
+                    out.innerText = "Sistemden yanıt alınamadı.";
                 }
             } catch(e) {
-                output.innerText = "Bağlantı Hatası: Sunucuya ulaşılamıyor.\n\nEğer SMS Bomber çalışmıyorsa numara formatını (5xxxxxxxxx) kontrol edin.";
+                out.innerText = "Bağlantı Hatası: API sunucusu kapalı olabilir veya proxy engellendi.";
             }
         }
     </script>
 </body>
 </html>
-
