@@ -3,169 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HILE_WROX | VIP PANEL v3</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>WROX - VIP Sorgu Paneli</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --dark: #070b14; --card: #121826; --blue: #3b82f6; --text: #e2e8f0; }
-        body { background-color: var(--dark); color: var(--text); font-family: 'Segoe UI', sans-serif; }
-        
-        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--card); transition: 0.3s; z-index: 1050; border-right: 1px solid #2d3748; }
+        :root { --bg: #0a0a0a; --side: #121212; --accent: #00ff00; --text: #e0e0e0; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+        #key-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; transition: 0.5s; }
+        .key-card { background: var(--side); padding: 40px; border-radius: 15px; border: 1px solid #333; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 20px rgba(0,255,0,0.1); }
+        .sidebar { width: 260px; background: var(--side); height: 100vh; border-right: 1px solid #222; position: fixed; left: -260px; transition: 0.3s; z-index: 999; display: flex; flex-direction: column; overflow-y: auto; }
         .sidebar.active { left: 0; }
-        .sidebar-link { padding: 15px 25px; display: block; color: #94a3b8; text-decoration: none; border-bottom: 1px solid #1e293b; transition: 0.2s; }
-        .sidebar-link:hover { background: #1e293b; color: var(--blue); }
-
-        .top-bar { background: var(--card); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #2d3748; }
-        .main-container { padding: 25px; }
-        
-        /* DETAYLI KART TASARIMI */
-        .res-card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #2d3748; border-left: 6px solid var(--blue); }
-        .data-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e293b; }
-        .data-label { color: #64748b; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; }
-        .data-value { color: #fff; font-size: 0.95rem; text-align: right; }
-        
-        .badge-yakinlik { background: var(--blue); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 10px; display: inline-block; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1040; }
+        .logo-area { padding: 25px 20px; font-size: 20px; font-weight: bold; color: var(--accent); border-bottom: 1px solid #222; text-align: center; letter-spacing: 2px; }
+        .mobile-header { display: none; background: var(--side); padding: 15px; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 998; align-items: center; }
+        .hamburger { font-size: 24px; color: var(--accent); cursor: pointer; margin-right: 15px; }
+        .nav-links { flex: 1; padding-top: 10px; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; color: #aaa; border-left: 3px solid transparent; font-size: 14px; }
+        .nav-item i { width: 25px; font-size: 16px; margin-right: 10px; }
+        .nav-item:hover, .nav-item.active { background: #1a1a1a; color: #fff; border-left-color: var(--accent); }
+        .main { margin-left: 0; padding: 20px; transition: 0.3s; opacity: 0; pointer-events: none; }
+        .main.visible { opacity: 1; pointer-events: auto; }
+        @media (min-width: 992px) { .sidebar { left: 0; } .main { margin-left: 260px; } .mobile-header { display: none; } }
+        @media (max-width: 991px) { .mobile-header { display: flex; } }
+        .container { background: var(--side); padding: 25px; border-radius: 12px; border: 1px solid #222; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: var(--accent); border-radius: 6px; margin: 8px 0; outline: none; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 5px var(--accent); }
+        button { width: 100%; padding: 14px; background: var(--accent); border: none; color: #000; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; }
+        button:hover { background: #00cc00; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,0,0.3); }
+        .result { margin-top: 25px; background: #050505; border-radius: 10px; padding: 20px; border: 1px solid #222; display: none; position: relative; }
+        .result::before { content: "SONUÇLAR"; position: absolute; top: -10px; left: 20px; background: var(--bg); padding: 0 10px; font-size: 12px; color: var(--accent); }
+        pre { white-space: pre-wrap; word-wrap: break-word; font-size: 13px; color: #00ff00; margin: 0; font-family: 'Consolas', monospace; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 990; }
+        #overlay.active { display: block; }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-<div class="sidebar" id="sidebar">
-    <div class="p-4 text-center border-bottom border-secondary">
-        <h4 class="text-primary fw-bold">@HILE_WROX</h4>
-        <span class="badge bg-primary">VIP: Efecan1903</span>
-    </div>
-    <div class="sidebar-links">
-        <a href="#" class="sidebar-link" onclick="init('soyagaci', '🧬 Soyağacı PRO')"><i class="fa fa-dna me-2"></i> Soyağacı</a>
-        <a href="#" class="sidebar-link" onclick="init('sulale', '🌳 Sülale Sorgu')"><i class="fa fa-tree me-2"></i> Sülale</a>
-        <a href="#" class="sidebar-link" onclick="init('adsoyadpro', '👤 Ad Soyad İl PRO')"><i class="fa fa-users me-2"></i> Ad Soyad İl</a>
-        <a href="#" class="sidebar-link" onclick="init('tcpro', '🆔 TC PRO')"><i class="fa fa-id-card me-2"></i> TC PRO</a>
-        <a href="#" class="sidebar-link" onclick="init('isyeri', '🏢 İşyeri Sorgu')"><i class="fa fa-building me-2"></i> İşyeri</a>
-        <a href="#" class="sidebar-link" onclick="init('adrespro', '📍 Adres PRO')"><i class="fa fa-map-pin me-2"></i> Adres PRO</a>
-        <a href="#" class="sidebar-link" onclick="init('gsmtc', '📞 GSM -> TC')"><i class="fa fa-phone me-2"></i> GSM -> TC</a>
-    </div>
-</div>
-
-<div class="top-bar">
-    <i class="fa fa-bars fs-3 text-primary" style="cursor:pointer;" onclick="toggleSidebar()"></i>
-    <h5 class="ms-3 mb-0" id="title">🧬 Soyağacı PRO</h5>
-</div>
-
-<div class="main-container container">
-    <div class="bg-dark p-4 rounded-3 border border-secondary mb-4">
-        <div id="input-area">
-            <input type="text" id="val" class="form-control bg-dark text-white border-secondary py-3" placeholder="TC No Girin...">
+    <div id="key-screen">
+        <div class="key-card">
+            <i class="fa-solid fa-user-secret" style="font-size: 50px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2 style="margin-bottom: 5px;">WROX VIP</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Erişim için anahtarınızı doğrulayın.</p>
+            <input type="password" id="main-key" placeholder="VIP Parolanızı Girin...">
+            <button onclick="checkKey()">SİSTEMİ AÇ</button>
         </div>
-        <button class="btn btn-primary w-100 mt-3 py-3 fw-bold" onclick="fetchData()">SORGULA</button>
     </div>
 
-    <div id="loading" class="text-center my-5" style="display:none;">
-        <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">Soyağacı kökleri taranıyor, bekleyin...</p>
+    <div class="mobile-header" id="mob-head" style="display:none;">
+        <i class="fa-solid fa-bars hamburger" onclick="toggleMenu()"></i>
+        <span style="letter-spacing: 1px;">WROX VIP PANEL</span>
     </div>
 
-    <div id="results"></div>
-</div>
+    <div id="overlay" onclick="toggleMenu()"></div>
 
-<script>
-    let currentMode = 'soyagaci';
+    <div class="sidebar" id="sidebar-ui">
+        <div class="logo-area">WROX v2.0</div>
+        <div class="nav-links">
+            <div class="nav-item active" onclick="tab('tcpro')"><i class="fa-solid fa-id-card"></i> TC Sorgu Pro</div>
+            <div class="nav-item" onclick="tab('adsoyadpro')"><i class="fa-solid fa-users"></i> Ad Soyad Pro</div>
+            <div class="nav-item" onclick="tab('adililce')"><i class="fa-solid fa-magnifying-glass-location"></i> Ad İl/İlçe</div>
+            <div class="nav-item" onclick="tab('ailepro')"><i class="fa-solid fa-people-group"></i> Aile Sorgu</div>
+            <div class="nav-item" onclick="tab('sulale')"><i class="fa-solid fa-sitemap"></i> Sülale Sorgu</div>
+            <div class="nav-item" onclick="tab('soyagaci')"><i class="fa-solid fa-tree"></i> Soyağacı</div>
+            <div class="nav-item" onclick="tab('adrespro')"><i class="fa-solid fa-map-location"></i> Adres Sorgu</div>
+            <div class="nav-item" onclick="tab('isyeri')"><i class="fa-solid fa-building"></i> İşyeri Sorgu</div>
+            <div class="nav-item" onclick="tab('isyeriark')"><i class="fa-solid fa-briefcase"></i> İşyeri Arkadaş</div>
+            <div class="nav-item" onclick="tab('tcgsm')"><i class="fa-solid fa-mobile-screen"></i> TC -> GSM</div>
+            <div class="nav-item" onclick="tab('gsmtc')"><i class="fa-solid fa-phone-flip"></i> GSM -> TC</div>
+            <div class="nav-item" onclick="tab('gncloperator')"><i class="fa-solid fa-tower-cell"></i> Operatör Sorgu</div>
+            <div class="nav-item" onclick="tab('iban')"><i class="fa-solid fa-credit-card"></i> IBAN Sorgu</div>
+            <div class="nav-item" onclick="tab('okulno')"><i class="fa-solid fa-graduation-cap"></i> Okul No Sorgu</div>
+            <div class="nav-item" onclick="tab('tg')"><i class="fa-brands fa-telegram"></i> Telegram ID</div>
+            <div class="nav-item" onclick="tab('sms')"><i class="fa-solid fa-bomb"></i> SMS Bomber</div>
+        </div>
+    </div>
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        const overlay = document.getElementById('overlay');
-        overlay.style.display = (overlay.style.display === 'block') ? 'none' : 'block';
-    }
+    <div class="main" id="content-ui">
+        <h2 id="title">TC Sorgulama Pro</h2>
+        <div class="container">
+            <div id="inputs">
+                <input type="text" id="v1" placeholder="TC Kimlik No Girin...">
+            </div>
+            <button onclick="sorgula()">SORGULAMAYI BAŞLAT</button>
+        </div>
+        <div id="res-box" class="result">
+            <pre id="output"></pre>
+        </div>
+    </div>
 
-    function init(op, title) {
-        currentMode = op;
-        document.getElementById('title').innerText = title;
-        const area = document.getElementById('input-area');
-        document.getElementById('results').innerHTML = "";
-        
-        if(op === 'adsoyadpro') {
-            area.innerHTML = `
-                <input type="text" id="ad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="Ad">
-                <input type="text" id="soyad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="Soyad">
-                <input type="text" id="il" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="İl (Opsiyonel)">
-            `;
-        } else {
-            area.innerHTML = `<input type="text" id="val" class="form-control bg-dark text-white border-secondary py-3" placeholder="TC veya Veri girin...">`;
+    <script>
+        let mode = 'tcpro';
+        const base = "https://punisher.alwaysdata.net/apiservices";
+
+        function checkKey() {
+            if(document.getElementById('main-key').value === "Efecan1903") {
+                document.getElementById('key-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('key-screen').style.display = 'none';
+                    document.getElementById('content-ui').classList.add('visible');
+                    if(window.innerWidth < 992) document.getElementById('mob-head').style.display = 'flex';
+                }, 500);
+            } else {
+                alert("Geçersiz VIP Anahtarı!");
+            }
         }
-        toggleSidebar();
-    }
 
-    async function fetchData() {
-        const resDiv = document.getElementById('results');
-        const loader = document.getElementById('loading');
-        resDiv.innerHTML = ""; loader.style.display = "block";
-
-        let url = `https://punisher.alwaysdata.net/apiservices/${currentMode}.php`;
-        if(currentMode === 'sulale') url = "https://arastir.sbs/api/sulale.php";
-        if(currentMode === 'adrespro') url = "https://arastir.sbs/api/adres.php";
-
-        let p = new URLSearchParams();
-        if(currentMode === 'adsoyadpro') {
-            p.append('ad', document.getElementById('ad').value);
-            p.append('soyad', document.getElementById('soyad').value);
-            p.append('il', document.getElementById('il').value);
-        } else {
-            let v = document.getElementById('val').value;
-            p.append('tc', v); p.append('tcno', v); p.append('gsm', v);
+        function toggleMenu() {
+            document.getElementById('sidebar-ui').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
         }
 
-        try {
-            const response = await fetch(url + "?" + p.toString());
-            const json = await response.json();
-            loader.style.display = "none";
+        function tab(m) {
+            mode = m;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('title').innerText = event.currentTarget.innerText;
+            if(window.innerWidth < 992) toggleMenu();
+            
+            const inp = document.getElementById('inputs');
+            // Menüye göre giriş alanlarını düzenleme
+            if(m === 'adsoyadpro') {
+                inp.innerHTML = `<input id="ad" placeholder="Ad"><input id="soyad" placeholder="Soyad"><input id="il" placeholder="İl">`;
+            } else if(m === 'adililce') {
+                inp.innerHTML = `<input id="ad" placeholder="Ad"><input id="il" placeholder="İl">`;
+            } else if(m === 'gncloperator' || m === 'sms') {
+                inp.innerHTML = `<input id="v1" placeholder="Telefon No (Örn: 541...)">`;
+            } else if(m === 'gsmtc') {
+                inp.innerHTML = `<input id="v1" placeholder="GSM No (Örn: 541...)">`;
+            } else if(m === 'iban') {
+                inp.innerHTML = `<input id="v1" placeholder="IBAN No (TR...)">`;
+            } else if(m === 'tg') {
+                inp.innerHTML = `<input id="v1" placeholder="Telegram Kullanıcı Adı">`;
+            } else {
+                inp.innerHTML = `<input id="v1" placeholder="TC Kimlik No Girin...">`;
+            }
+        }
 
-            // 🔥 SOYAĞACI FİX: İç içe geçmiş listeleri bul (Deep Search)
-            let dataList = [];
-            if (Array.isArray(json)) dataList = json;
-            else if (json.soyagaci) dataList = json.soyagaci;
-            else if (json.data) dataList = Array.isArray(json.data) ? json.data : [json.data];
-            else if (json.results) dataList = json.results;
-            else dataList = [json];
-
-            if(!dataList || dataList.length === 0 || dataList[0] === null) {
-                resDiv.innerHTML = '<div class="alert alert-warning text-center">❌ Kayıt bulunamadı.</div>';
-                return;
+        async function sorgula() {
+            let url = `${base}/${mode}.php?`;
+            
+            if(mode === 'adsoyadpro') {
+                url += `ad=${document.getElementById('ad').value}&soyad=${document.getElementById('soyad').value}&il=${document.getElementById('il').value}`;
+            } else if(mode === 'adililce') {
+                url += `ad=${document.getElementById('ad').value}&il=${document.getElementById('il').value}`;
+            } else if(mode === 'gncloperator') {
+                url += `numara=${document.getElementById('v1').value}`;
+            } else if(mode === 'gsmtc') {
+                url += `gsm=${document.getElementById('v1').value}`;
+            } else if(mode === 'iban') {
+                url += `iban=${document.getElementById('v1').value}`;
+            } else if(mode === 'sms') {
+                url += `gsm=${document.getElementById('v1').value}`;
+            } else if(mode === 'tg') {
+                url += `username=${document.getElementById('v1').value}`;
+            } else {
+                url += `tc=${document.getElementById('v1').value}`;
             }
 
-            let html = `<h5 class="mb-4 text-info">${dataList.length} Kişi bulundu.</h5>`;
-            
-            dataList.forEach(item => {
-                // Her objeyi temizle ve değerleri yakala
-                let clean = {};
-                Object.keys(item).forEach(k => { clean[k.toLowerCase()] = item[k]; });
+            const output = document.getElementById('output');
+            document.getElementById('res-box').style.display = 'block';
+            output.innerText = "Sorgu yürütülüyor...";
 
-                let adSoyad = `${clean.ad || clean.adi || ''} ${clean.soyad || clean.soyadi || ''}`.trim();
-                let yakinlik = clean.yakinlik || clean.iliski || clean.tip || "Kişi";
+            try {
+                // Not: Herkese açık proxy bazen yavaş olabilir, sunucu tabanlı kullanmak daha iyidir.
+                const proxy = "https://api.allorigins.win/get?url=";
+                const response = await fetch(proxy + encodeURIComponent(url));
+                const data = await response.json();
                 
-                html += `
-                <div class="res-card">
-                    <div class="badge-yakinlik">${yakinlik.toUpperCase()}</div>
-                    <div class="data-row"><span class="data-label">TAM ADI:</span><span class="data-value text-primary fw-bold">${adSoyad || 'Bilinmiyor'}</span></div>
-                    <div class="data-row"><span class="data-label">TC NO:</span><span class="data-value text-warning">${clean.tc || clean.tcno || clean.tc_no || '---'}</span></div>
-                    <div class="data-row"><span class="data-label">DOĞUM:</span><span class="data-value">${clean.dogum || clean.dogumtarihi || clean.dtarih || '---'}</span></div>
-                    <div class="data-row"><span class="data-label">BİLGİ / İL:</span><span class="data-value">${clean.il || clean.adres || clean.isyeri_adi || '---'}</span></div>
-                    <div class="data-row"><span class="data-label">ANNE / BABA:</span><span class="data-value">${clean.anneadi || ''} / ${clean.babaadi || ''}</span></div>
-                    <div class="data-row">
-                        <span class="data-label">DURUM:</span>
-                        <span class="data-value fw-bold ${clean.olum || clean.olumtarihi ? 'text-danger' : 'text-success'}">
-                            ${clean.olum || clean.olumtarihi ? 'VEFAT ('+ (clean.olum || clean.olumtarihi) +')' : 'HAYATTA'}
-                        </span>
-                    </div>
-                </div>`;
-            });
-            resDiv.innerHTML = html;
-
-        } catch (e) {
-            loader.style.display = "none";
-            resDiv.innerHTML = '<div class="alert alert-danger text-center">⚠️ Sunucu Hatası: API erişimi reddedildi veya JSON formatı bozuk.</div>';
+                if(data.contents) {
+                    output.innerText = data.contents;
+                } else {
+                    output.innerText = "Veri alınamadı.";
+                }
+            } catch(e) {
+                output.innerText = "Hata: Sunucuya bağlanılamadı. API kapalı olabilir veya CORS engeline takılıyor.";
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
