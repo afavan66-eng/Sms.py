@@ -3,33 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HILE_WROX | VIP SOURCE</title>
+    <title>HILE_WROX | VIP PANEL v3</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --main-bg: #0b0e14; --card-bg: #151921; --accent: #3b82f6; --text-muted: #94a3b8; }
-        body { background-color: var(--main-bg); color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        :root { --dark: #070b14; --card: #121826; --blue: #3b82f6; --text: #e2e8f0; }
+        body { background-color: var(--dark); color: var(--text); font-family: 'Segoe UI', sans-serif; }
         
-        /* Hamburger Sidebar */
-        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--card-bg); transition: 0.3s ease; z-index: 1050; border-right: 1px solid #2d3748; }
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--card); transition: 0.3s; z-index: 1050; border-right: 1px solid #2d3748; }
         .sidebar.active { left: 0; }
-        .sidebar-link { padding: 15px 25px; display: block; color: #cbd5e1; text-decoration: none; border-bottom: 1px solid #1f2937; }
-        .sidebar-link:hover { background: #1e293b; color: var(--accent); }
+        .sidebar-link { padding: 15px 25px; display: block; color: #94a3b8; text-decoration: none; border-bottom: 1px solid #1e293b; transition: 0.2s; }
+        .sidebar-link:hover { background: #1e293b; color: var(--blue); }
 
-        /* Content Area */
-        .top-bar { background: var(--card-bg); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #2d3748; }
-        .query-card { background: var(--card-bg); border-radius: 12px; padding: 25px; margin-top: 20px; border: 1px solid #2d3748; }
+        .top-bar { background: var(--card); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #2d3748; }
+        .main-container { padding: 25px; }
         
-        /* Result Item (Tüm Bilgileri Gösteren Kart) */
-        .result-item { background: #0f172a; border-radius: 10px; padding: 18px; margin-bottom: 15px; border-left: 4px solid var(--accent); position: relative; }
-        .field-row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #1e293b; padding-bottom: 2px; }
-        .label { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
-        .value { color: #fff; font-size: 0.95rem; font-weight: 500; }
+        /* DETAYLI KART TASARIMI */
+        .res-card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #2d3748; border-left: 6px solid var(--blue); }
+        .data-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e293b; }
+        .data-label { color: #64748b; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; }
+        .data-value { color: #fff; font-size: 0.95rem; text-align: right; }
         
-        .status-alive { color: #10b981; font-weight: bold; }
-        .status-dead { color: #ef4444; font-weight: bold; }
-        
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1040; }
+        .badge-yakinlik { background: var(--blue); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 10px; display: inline-block; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1040; }
     </style>
 </head>
 <body>
@@ -37,46 +33,44 @@
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <div class="p-4 text-center">
+    <div class="p-4 text-center border-bottom border-secondary">
         <h4 class="text-primary fw-bold">@HILE_WROX</h4>
-        <small class="text-muted">Efecan1903 VIP Panel</small>
+        <span class="badge bg-primary">VIP: Efecan1903</span>
     </div>
     <div class="sidebar-links">
-        <a href="#" class="sidebar-link" onclick="ui('soyagaci', '🧬 Soyağacı PRO')"><i class="fa fa-dna me-2"></i> Soyağacı</a>
-        <a href="#" class="sidebar-link" onclick="ui('sulale', '🌳 Sülale Sorgu')"><i class="fa fa-tree me-2"></i> Sülale</a>
-        <a href="#" class="sidebar-link" onclick="ui('adsoyadpro', '👤 Ad Soyad İl PRO')"><i class="fa fa-users me-2"></i> Ad Soyad İl</a>
-        <a href="#" class="sidebar-link" onclick="ui('tcpro', '🆔 TC PRO')"><i class="fa fa-id-card me-2"></i> TC PRO</a>
-        <a href="#" class="sidebar-link" onclick="ui('isyeri', '🏢 İşyeri Sorgu')"><i class="fa fa-briefcase me-2"></i> İşyeri</a>
-        <a href="#" class="sidebar-link" onclick="ui('isyeriark', '👥 İş Arkadaşları')"><i class="fa fa-user-group me-2"></i> İş Arkadaşı</a>
-        <a href="#" class="sidebar-link" onclick="ui('adrespro', '📍 Adres PRO')"><i class="fa fa-map-marker-alt me-2"></i> Adres PRO</a>
-        <a href="#" class="sidebar-link" onclick="ui('gsmtc', '📞 GSM -> TC')"><i class="fa fa-phone me-2"></i> GSM -> TC</a>
+        <a href="#" class="sidebar-link" onclick="init('soyagaci', '🧬 Soyağacı PRO')"><i class="fa fa-dna me-2"></i> Soyağacı</a>
+        <a href="#" class="sidebar-link" onclick="init('sulale', '🌳 Sülale Sorgu')"><i class="fa fa-tree me-2"></i> Sülale</a>
+        <a href="#" class="sidebar-link" onclick="init('adsoyadpro', '👤 Ad Soyad İl PRO')"><i class="fa fa-users me-2"></i> Ad Soyad İl</a>
+        <a href="#" class="sidebar-link" onclick="init('tcpro', '🆔 TC PRO')"><i class="fa fa-id-card me-2"></i> TC PRO</a>
+        <a href="#" class="sidebar-link" onclick="init('isyeri', '🏢 İşyeri Sorgu')"><i class="fa fa-building me-2"></i> İşyeri</a>
+        <a href="#" class="sidebar-link" onclick="init('adrespro', '📍 Adres PRO')"><i class="fa fa-map-pin me-2"></i> Adres PRO</a>
+        <a href="#" class="sidebar-link" onclick="init('gsmtc', '📞 GSM -> TC')"><i class="fa fa-phone me-2"></i> GSM -> TC</a>
     </div>
 </div>
 
 <div class="top-bar">
     <i class="fa fa-bars fs-3 text-primary" style="cursor:pointer;" onclick="toggleSidebar()"></i>
-    <h5 class="ms-3 mb-0" id="current-title">🧬 Soyağacı PRO</h5>
+    <h5 class="ms-3 mb-0" id="title">🧬 Soyağacı PRO</h5>
 </div>
 
-<div class="container">
-    <div class="query-card shadow">
-        <div id="inputs">
-            <label class="mb-2">Sorgulanacak TC No:</label>
-            <input type="text" id="q_val" class="form-control bg-dark text-white border-secondary py-3" placeholder="11 haneli TC girin...">
+<div class="main-container container">
+    <div class="bg-dark p-4 rounded-3 border border-secondary mb-4">
+        <div id="input-area">
+            <input type="text" id="val" class="form-control bg-dark text-white border-secondary py-3" placeholder="TC No Girin...">
         </div>
-        <button class="btn btn-primary w-100 mt-3 py-3 fw-bold" onclick="startQuery()">SORGULA</button>
+        <button class="btn btn-primary w-100 mt-3 py-3 fw-bold" onclick="fetchData()">SORGULA</button>
     </div>
 
-    <div id="loading" class="text-center mt-5" style="display:none;">
+    <div id="loading" class="text-center my-5" style="display:none;">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">Veriler derinlemesine taranıyor, lütfen bekle...</p>
+        <p class="mt-2 text-muted">Soyağacı kökleri taranıyor, bekleyin...</p>
     </div>
 
-    <div id="results" class="mt-4"></div>
+    <div id="results"></div>
 </div>
 
 <script>
-    let activeOp = 'soyagaci';
+    let currentMode = 'soyagaci';
 
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
@@ -84,90 +78,92 @@
         overlay.style.display = (overlay.style.display === 'block') ? 'none' : 'block';
     }
 
-    function ui(op, title) {
-        activeOp = op;
-        document.getElementById('current-title').innerText = title;
-        const inputDiv = document.getElementById('inputs');
+    function init(op, title) {
+        currentMode = op;
+        document.getElementById('title').innerText = title;
+        const area = document.getElementById('input-area');
         document.getElementById('results').innerHTML = "";
         
         if(op === 'adsoyadpro') {
-            inputDiv.innerHTML = `
-                <input type="text" id="ad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="İsim">
-                <input type="text" id="soyad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="Soyisim">
-                <input type="text" id="il" class="form-control mb-3 bg-dark text-white border-secondary" placeholder="İl (Tüm TR için boş bırak)">
+            area.innerHTML = `
+                <input type="text" id="ad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="Ad">
+                <input type="text" id="soyad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="Soyad">
+                <input type="text" id="il" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="İl (Opsiyonel)">
             `;
         } else {
-            let p = op === 'gsmtc' ? 'GSM No girin...' : 'TC No girin...';
-            inputDiv.innerHTML = `<label class="mb-2">Veri Girin:</label><input type="text" id="q_val" class="form-control bg-dark text-white border-secondary py-3" placeholder="${p}">`;
+            area.innerHTML = `<input type="text" id="val" class="form-control bg-dark text-white border-secondary py-3" placeholder="TC veya Veri girin...">`;
         }
         toggleSidebar();
     }
 
-    async function startQuery() {
+    async function fetchData() {
         const resDiv = document.getElementById('results');
-        const loading = document.getElementById('loading');
-        resDiv.innerHTML = "";
-        loading.style.display = "block";
+        const loader = document.getElementById('loading');
+        resDiv.innerHTML = ""; loader.style.display = "block";
 
-        let url = `https://punisher.alwaysdata.net/apiservices/${activeOp}.php`;
-        if(activeOp === 'sulale') url = "https://arastir.sbs/api/sulale.php";
-        if(activeOp === 'adrespro') url = "https://arastir.sbs/api/adres.php";
+        let url = `https://punisher.alwaysdata.net/apiservices/${currentMode}.php`;
+        if(currentMode === 'sulale') url = "https://arastir.sbs/api/sulale.php";
+        if(currentMode === 'adrespro') url = "https://arastir.sbs/api/adres.php";
 
         let p = new URLSearchParams();
-        if(activeOp === 'adsoyadpro') {
+        if(currentMode === 'adsoyadpro') {
             p.append('ad', document.getElementById('ad').value);
             p.append('soyad', document.getElementById('soyad').value);
             p.append('il', document.getElementById('il').value);
         } else {
-            let v = document.getElementById('q_val').value;
+            let v = document.getElementById('val').value;
             p.append('tc', v); p.append('tcno', v); p.append('gsm', v);
         }
 
         try {
             const response = await fetch(url + "?" + p.toString());
-            const data = await response.json();
-            loading.style.display = "none";
+            const json = await response.json();
+            loader.style.display = "none";
 
-            // 🔥 KRİTİK NOKTA: Veriyi her katmanda ara (soyagaci, results, data vb.)
-            let cleanData = data.soyagaci || data.results || data.data || data.result || data.Sulale || (Array.isArray(data) ? data : [data]);
+            // 🔥 SOYAĞACI FİX: İç içe geçmiş listeleri bul (Deep Search)
+            let dataList = [];
+            if (Array.isArray(json)) dataList = json;
+            else if (json.soyagaci) dataList = json.soyagaci;
+            else if (json.data) dataList = Array.isArray(json.data) ? json.data : [json.data];
+            else if (json.results) dataList = json.results;
+            else dataList = [json];
 
-            if(!cleanData || cleanData.length === 0 || cleanData[0] === null) {
+            if(!dataList || dataList.length === 0 || dataList[0] === null) {
                 resDiv.innerHTML = '<div class="alert alert-warning text-center">❌ Kayıt bulunamadı.</div>';
                 return;
             }
 
-            let html = `<h5 class="mb-3 text-info fw-bold">${cleanData.length} Kayıt Getirildi</h5>`;
-            cleanData.forEach(item => {
-                // Anahtarları normalize et (Büyük/Küçük harf duyarlılığı fix)
-                let row = {};
-                for (let key in item) { row[key.toLowerCase()] = item[key]; }
+            let html = `<h5 class="mb-4 text-info">${dataList.length} Kişi bulundu.</h5>`;
+            
+            dataList.forEach(item => {
+                // Her objeyi temizle ve değerleri yakala
+                let clean = {};
+                Object.keys(item).forEach(k => { clean[k.toLowerCase()] = item[k]; });
 
-                let ad = row.ad || row.adi || row.name || "";
-                let soyad = row.soyad || row.soyadi || row.surname || "";
-                let tc = row.tc || row.tcno || row.tc_no || "Bilinmiyor";
-                let dogum = row.dogum || row.dogumtarihi || row.dtarih || "";
-                let yakinlik = row.yakinlik || row.iliski || row.tip || "Kişi";
-                let adres = row.il || row.ilce || row.adres || row.ikametgah || "";
-                let olum = row.olumtarihi || row.olum || "";
-
+                let adSoyad = `${clean.ad || clean.adi || ''} ${clean.soyad || clean.soyadi || ''}`.trim();
+                let yakinlik = clean.yakinlik || clean.iliski || clean.tip || "Kişi";
+                
                 html += `
-                <div class="result-item">
-                    <div class="field-row"><span class="label">YAKINLIK</span><span class="value text-primary">${yakinlik.toUpperCase()}</span></div>
-                    <div class="field-row"><span class="label">AD SOYAD</span><span class="value">${ad} ${soyad}</span></div>
-                    <div class="field-row"><span class="label">TC NO</span><span class="value text-warning">${tc}</span></div>
-                    ${dogum ? `<div class="field-row"><span class="label">DOĞUM TARİHİ</span><span class="value">${dogum}</span></div>` : ''}
-                    ${adres ? `<div class="field-row"><span class="label">BİLGİ/ADRES</span><span class="value text-muted">${adres}</span></div>` : ''}
-                    <div class="field-row">
-                        <span class="label">DURUM</span>
-                        <span class="${olum ? 'status-dead' : 'status-alive'}">${olum ? 'VEFAT ('+olum+')' : 'HAYATTA'}</span>
+                <div class="res-card">
+                    <div class="badge-yakinlik">${yakinlik.toUpperCase()}</div>
+                    <div class="data-row"><span class="data-label">TAM ADI:</span><span class="data-value text-primary fw-bold">${adSoyad || 'Bilinmiyor'}</span></div>
+                    <div class="data-row"><span class="data-label">TC NO:</span><span class="data-value text-warning">${clean.tc || clean.tcno || clean.tc_no || '---'}</span></div>
+                    <div class="data-row"><span class="data-label">DOĞUM:</span><span class="data-value">${clean.dogum || clean.dogumtarihi || clean.dtarih || '---'}</span></div>
+                    <div class="data-row"><span class="data-label">BİLGİ / İL:</span><span class="data-value">${clean.il || clean.adres || clean.isyeri_adi || '---'}</span></div>
+                    <div class="data-row"><span class="data-label">ANNE / BABA:</span><span class="data-value">${clean.anneadi || ''} / ${clean.babaadi || ''}</span></div>
+                    <div class="data-row">
+                        <span class="data-label">DURUM:</span>
+                        <span class="data-value fw-bold ${clean.olum || clean.olumtarihi ? 'text-danger' : 'text-success'}">
+                            ${clean.olum || clean.olumtarihi ? 'VEFAT ('+ (clean.olum || clean.olumtarihi) +')' : 'HAYATTA'}
+                        </span>
                     </div>
                 </div>`;
             });
             resDiv.innerHTML = html;
 
         } catch (e) {
-            loading.style.display = "none";
-            resDiv.innerHTML = '<div class="alert alert-danger">⚠️ API Hatası! Veri çekilemedi veya API kapalı.</div>';
+            loader.style.display = "none";
+            resDiv.innerHTML = '<div class="alert alert-danger text-center">⚠️ Sunucu Hatası: API erişimi reddedildi veya JSON formatı bozuk.</div>';
         }
     }
 </script>
