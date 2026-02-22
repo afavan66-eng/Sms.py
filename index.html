@@ -3,158 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HILE_WROX | VIP Panel</title>
+    <title>HILE_WROX VIP PANEL</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg-dark: #0f172a; --card-bg: #1e293b; --accent: #3b82f6; --text: #f8fafc; }
-        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        :root { --bg: #0a0f1e; --card: #161d31; --primary: #3b82f6; --text: #d0d2d6; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; }
         
-        /* Hamburger Sidebar */
-        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100vh; background: var(--card-bg); transition: 0.4s ease; z-index: 1050; border-right: 1px solid #334155; padding-top: 20px; }
+        /* Hamburger Menü Stili */
+        .sidebar { position: fixed; left: -260px; top: 0; width: 260px; height: 100%; background: var(--card); transition: 0.3s; z-index: 1000; border-right: 1px solid #283046; }
         .sidebar.active { left: 0; }
-        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid #334155; }
-        .sidebar-menu a { padding: 15px 25px; display: block; color: #cbd5e1; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; }
-        .sidebar-menu a:hover, .sidebar-menu a.active { background: #334155; color: white; border-left-color: var(--accent); }
+        .sidebar-link { padding: 15px 20px; display: block; color: var(--text); text-decoration: none; border-bottom: 1px solid #283046; }
+        .sidebar-link:hover { background: #1f2945; color: var(--primary); }
 
-        /* Navbar & Content */
-        .top-nav { background: var(--card-bg); padding: 15px 25px; display: flex; align-items: center; border-bottom: 1px solid #334155; }
-        .menu-btn { font-size: 24px; cursor: pointer; color: var(--accent); }
-        .main-container { padding: 30px; transition: 0.4s; }
-        .query-card { background: var(--card-bg); border-radius: 15px; padding: 25px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        /* Kart ve Sonuçlar */
+        .main-card { background: var(--card); border-radius: 10px; padding: 25px; margin-top: 20px; border: 1px solid #283046; }
+        .res-box { background: #101624; border: 1px solid #3b4253; border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 5px solid var(--primary); }
+        .info-label { color: #82868b; font-size: 0.85rem; font-weight: bold; }
+        .info-value { color: #fff; font-size: 1rem; margin-bottom: 5px; }
         
-        /* Results */
-        .res-item { background: #0f172a; border-radius: 10px; padding: 20px; border-left: 5px solid var(--accent); margin-bottom: 15px; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .form-control { background: #0f172a; border: 1px solid #475569; color: white; border-radius: 8px; padding: 12px; }
-        .form-control:focus { background: #0f172a; color: white; border-color: var(--accent); box-shadow: none; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1040; }
+        .nav-header { background: var(--card); padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #283046; }
+        .hamburger { font-size: 24px; cursor: pointer; color: var(--primary); }
+        .overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h3 class="text-primary">@HILE_WROX</h3>
-        <small class="text-muted">VIP Sorgu Paneli</small>
+    <div class="p-4 text-center border-bottom border-secondary">
+        <h4 class="text-primary fw-bold">HILE_WROX</h4>
+        <span class="badge bg-danger">VIP ACCESS</span>
     </div>
-    <div class="sidebar-menu">
-        <a href="javascript:void(0)" onclick="setOp('soyagaci', '🧬 Soyağacı Sorgu')" class="active"><i class="fa fa-dna me-2"></i> Soyağacı</a>
-        <a href="javascript:void(0)" onclick="setOp('sulale', '🌳 Sülale Sorgu')"><i class="fa fa-tree me-2"></i> Sülale</a>
-        <a href="javascript:void(0)" onclick="setOp('tcpro', '🆔 TC PRO Sorgu')"><i class="fa fa-id-card me-2"></i> TC PRO</a>
-        <a href="javascript:void(0)" onclick="setOp('adsoyadpro', '👤 Ad Soyad İl PRO')"><i class="fa fa-users me-2"></i> Ad Soyad İl</a>
-        <a href="javascript:void(0)" onclick="setOp('isyeri', '🏢 İşyeri Sorgu')"><i class="fa fa-building me-2"></i> İşyeri</a>
-        <a href="javascript:void(0)" onclick="setOp('isyeriark', '👥 İş Arkadaşları')"><i class="fa fa-user-group me-2"></i> İş Arkadaşı</a>
-        <a href="javascript:void(0)" onclick="setOp('iban', '💳 IBAN Çözücü')"><i class="fa fa-credit-card me-2"></i> IBAN Çözücü</a>
-        <a href="javascript:void(0)" onclick="setOp('okulno', '🎓 Okul No Sorgu')"><i class="fa fa-graduation-cap me-2"></i> Okul No</a>
-        <a href="javascript:void(0)" onclick="setOp('gsmtc', '📞 GSM -> TC')"><i class="fa fa-phone me-2"></i> GSM TC</a>
+    <div class="sidebar-links mt-2">
+        <a href="#" class="sidebar-link" onclick="setup('soyagaci', '🧬 Soyağacı PRO')"><i class="fa fa-dna me-2"></i> Soyağacı</a>
+        <a href="#" class="sidebar-link" onclick="setup('sulale', '🌳 Sülale Sorgu')"><i class="fa fa-tree me-2"></i> Sülale</a>
+        <a href="#" class="sidebar-link" onclick="setup('adsoyadpro', '👤 Ad Soyad İl PRO')"><i class="fa fa-users me-2"></i> Ad Soyad İl</a>
+        <a href="#" class="sidebar-link" onclick="setup('tcpro', '🆔 TC PRO')"><i class="fa fa-id-card me-2"></i> TC PRO</a>
+        <a href="#" class="sidebar-link" onclick="setup('isyeri', '🏢 İşyeri Sorgu')"><i class="fa fa-briefcase me-2"></i> İşyeri</a>
+        <a href="#" class="sidebar-link" onclick="setup('isyeriark', '👥 İş Arkadaşları')"><i class="fa fa-user-group me-2"></i> İş Arkadaşı</a>
+        <a href="#" class="sidebar-link" onclick="setup('adrespro', '📍 Adres PRO')"><i class="fa fa-map-location-dot me-2"></i> Adres PRO</a>
+        <a href="#" class="sidebar-link" onclick="setup('gsmtc', '📞 GSM -> TC')"><i class="fa fa-phone me-2"></i> GSM -> TC</a>
+        <a href="#" class="sidebar-link" onclick="setup('okulno', '🎓 Okul No')"><i class="fa fa-school me-2"></i> Okul No</a>
+        <a href="#" class="sidebar-link" onclick="setup('iban', '💳 IBAN Çözücü')"><i class="fa fa-credit-card me-2"></i> IBAN Çözücü</a>
     </div>
 </div>
 
-<div class="top-nav">
-    <i class="fa fa-bars menu-btn" onclick="toggleMenu()"></i>
-    <h5 class="ms-4 mb-0" id="current-title">🧬 Soyağacı Sorgu</h5>
+<div class="nav-header">
+    <i class="fa fa-bars hamburger" onclick="toggleSidebar()"></i>
+    <h5 class="ms-3 mb-0" id="panel-title">🧬 Soyağacı PRO</h5>
 </div>
 
-<div class="main-container container">
-    <div class="query-card">
-        <div id="input-fields">
-            <input type="text" id="main_input" class="form-control mb-3" placeholder="TC Kimlik No Girin...">
+<div class="container pb-5">
+    <div class="main-card shadow-lg">
+        <div id="input-container">
+            <label class="mb-2">TC Kimlik Numarası:</label>
+            <input type="text" id="val1" class="form-control mb-3 bg-dark text-white border-secondary" placeholder="11 haneli TC girin...">
         </div>
-        <button class="btn btn-primary w-100 py-3 fw-bold" onclick="runSorgu()">SORGULA</button>
+        <button class="btn btn-primary w-100 fw-bold p-3" onclick="executeSorgu()">SORGULA</button>
     </div>
 
-    <div id="results" class="mt-5">
-        </div>
+    <div id="loader" class="text-center mt-5" style="display:none;">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-2">Veriler derinlemesine taranıyor...</p>
+    </div>
+
+    <div id="results" class="mt-4"></div>
 </div>
 
 <script>
     let currentOp = 'soyagaci';
 
-    function toggleMenu() {
+    function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         const overlay = document.getElementById('overlay');
-        overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
+        overlay.style.display = (overlay.style.display === 'block') ? 'none' : 'block';
     }
 
-    function setOp(op, title) {
+    function setup(op, title) {
         currentOp = op;
-        document.getElementById('current-title').innerText = title;
-        const inputArea = document.getElementById('input-fields');
+        document.getElementById('panel-title').innerText = title;
+        const container = document.getElementById('input-container');
         document.getElementById('results').innerHTML = "";
         
-        // Ad Soyad İl için özel 3'lü input
         if(op === 'adsoyadpro') {
-            inputArea.innerHTML = `
-                <input type="text" id="ad" class="form-control mb-2" placeholder="Ad">
-                <input type="text" id="soyad" class="form-control mb-2" placeholder="Soyad">
-                <input type="text" id="il" class="form-control mb-3" placeholder="İl (Opsiyonel)">
+            container.innerHTML = `
+                <input type="text" id="ad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="İsim">
+                <input type="text" id="soyad" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="Soyisim">
+                <input type="text" id="il" class="form-control mb-3 bg-dark text-white border-secondary" placeholder="İl (Tüm TR için boş bırak)">
             `;
         } else {
-            let placeholder = op === 'iban' ? 'IBAN No Girin...' : (op === 'gsmtc' ? 'GSM No Girin...' : 'TC No Girin...');
-            inputArea.innerHTML = `<input type="text" id="main_input" class="form-control mb-3" placeholder="${placeholder}">`;
+            let label = op === 'iban' ? 'IBAN Numarası:' : (op === 'gsmtc' ? 'GSM Numarası:' : 'TC Kimlik Numarası:');
+            container.innerHTML = `<label class="mb-2">${label}</label><input type="text" id="val1" class="form-control mb-3 bg-dark text-white border-secondary">`;
         }
-        toggleMenu();
+        toggleSidebar();
     }
 
-    async function runSorgu() {
+    async function executeSorgu() {
         const resDiv = document.getElementById('results');
-        resDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary"></div><p class="mt-2">Veriler çekiliyor, bekle...</p></div>';
+        const loader = document.getElementById('loader');
+        resDiv.innerHTML = "";
+        loader.style.display = "block";
 
-        let url = `https://punisher.alwaysdata.net/apiservices/${currentOp}.php`;
-        if(currentOp === 'sulale') url = "https://arastir.sbs/api/sulale.php";
-        
         let params = new URLSearchParams();
+        let api_url = `https://punisher.alwaysdata.net/apiservices/${currentOp}.php`;
+        
+        // Sülale ve Diğer Özel API Yolları Fix
+        if(currentOp === 'sulale') api_url = "https://arastir.sbs/api/sulale.php";
+        if(currentOp === 'adrespro') api_url = "https://arastir.sbs/api/adres.php";
+
         if(currentOp === 'adsoyadpro') {
             params.append('ad', document.getElementById('ad').value);
             params.append('soyad', document.getElementById('soyad').value);
             params.append('il', document.getElementById('il').value);
         } else {
-            let val = document.getElementById('main_input').value;
-            params.append('tc', val); params.append('tcno', val); params.append('gsm', val); params.append('iban', val);
+            let v = document.getElementById('val1').value;
+            params.append('tc', v); params.append('tcno', v); params.append('gsm', v); params.append('iban', v);
         }
 
         try {
-            const resp = await fetch(url + "?" + params.toString());
-            const data = await resp.json();
-            
-            // Botta kullandığımız derin tarama mantığı
-            let finalData = data.soyagaci || data.data || data.results || data.result || (Array.isArray(data) ? data : [data]);
+            const response = await fetch(api_url + "?" + params.toString());
+            const json = await response.json();
+            loader.style.display = "none";
 
-            if(!finalData || finalData.length === 0 || finalData[0] === null) {
-                resDiv.innerHTML = '<div class="alert alert-danger">❌ Kayıt bulunamadı!</div>';
+            // DERİN TARAMA: Veri hangi anahtardaysa (soyagaci, data, results) onu bul.
+            let rawData = json.soyagaci || json.data || json.results || json.result || json.Akrabalar || json;
+            let list = Array.isArray(rawData) ? rawData : [rawData];
+
+            if(list.length === 0 || !list[0]) {
+                resDiv.innerHTML = '<div class="alert alert-warning text-center">❌ Kayıt bulunamadı.</div>';
                 return;
             }
 
-            let html = `<h4 class="mb-4 text-success">${finalData.length} Kayıt Bulundu</h4>`;
-            finalData.forEach(person => {
-                html += `
-                <div class="res-item">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <span class="text-muted small">AD SOYAD</span><br>
-                            <b class="text-white">${person.Ad || person.adi || 'Bilinmiyor'} ${person.Soyad || person.soyadi || ''}</b>
-                        </div>
-                        <div class="col-md-6">
-                            <span class="text-muted small">TC NO</span><br>
-                            <b class="text-accent">${person.TC || person.tcno || person.tc_no || 'Bilinmiyor'}</b>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <span class="text-muted small">DURUM / YAKINLIK</span><br>
-                            <span>${person.Yakinlik || person.iliski || person.tip || 'Kişi'}</span> - 
-                            <span class="${person.OlumTarihi ? 'text-danger' : 'text-success'}">${person.OlumTarihi ? 'VEFAT ('+person.OlumTarihi+')' : 'HAYATTA'}</span>
-                        </div>
-                    </div>
-                </div>`;
+            let html = `<h5 class="mb-3 text-primary">${list.length} Sonuç Listelendi</h5>`;
+            list.forEach(item => {
+                // Tüm bilgileri yakalamak için anahtar-değer döngüsü
+                html += `<div class="res-box">`;
+                html += `<div class="info-label">${(item.Yakinlik || item.iliski || "KİŞİ BİLGİSİ").toUpperCase()}</div>`;
+                html += `<div class="info-value text-info fw-bold">${item.Ad || item.adi || ''} ${item.Soyad || item.soyadi || ''}</div>`;
+                
+                // Geri kalan tüm bilgileri dinamik ekle
+                const fields = {
+                    "TC": item.TC || item.tcno || item.tc_no,
+                    "DOĞUM": item.DogumTarihi || item.dogum || item.dtarih,
+                    "BİLGİ": item.Adres || item.il || item.isyeri_adi || item.okul_no || item.gsm,
+                    "DURUM": item.OlumTarihi ? `<span class="text-danger">VEFAT (${item.OlumTarihi})</span>` : '<span class="text-success">HAYATTA</span>'
+                };
+
+                for (let [label, val] of Object.entries(fields)) {
+                    if(val && val !== "Bilinmiyor") {
+                        html += `<div><span class="info-label">${label}:</span> <span class="info-value">${val}</span></div>`;
+                    }
+                }
+                html += `</div>`;
             });
             resDiv.innerHTML = html;
+
         } catch (e) {
-            resDiv.innerHTML = '<div class="alert alert-danger">⚠️ API Hatası! Bağlantı kurulamadı.</div>';
+            loader.style.display = "none";
+            resDiv.innerHTML = '<div class="alert alert-danger text-center">⚠️ Sunucu Hatası: API yanıt vermiyor veya parametreler hatalı.</div>';
         }
     }
 </script>
+
 </body>
 </html>
